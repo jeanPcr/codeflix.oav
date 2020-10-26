@@ -38,7 +38,7 @@ module.exports.parseEnv = function parseEnv(filename) {
 
 module.exports.parseIni = function parseIni(filename) {
   let regexSection = /\[.[^\[]*/gms;
-  let regexSectionTitle = /^\[[^;].*\]/gm; // /^\[.*\]$/gm
+  let regexSectionTitle = /^\[.*\]$/gm; // /^\[.*\]$/gm
   let regexKeyValue = /^[^;\[]*\S$/gm;
   let myJson = {};
   let m;
@@ -50,22 +50,33 @@ module.exports.parseIni = function parseIni(filename) {
     }
     m.forEach((match) => {
       //console.log(match);
+      let title2 = "";
       let title = match.match(regexSectionTitle);
-      console.log(title);
-      //.match(/\b[\dA-Z\s]*\S$/gm)[0];
-      // let keysValues = match.match(regexKeyValue);
-      // keysValues.forEach((keyValue) => {
-      //   let key = keyValue.split("=")[0];
-      //   let value = keyValue.split("=")[1];
-      //   myJson[title] = { ...myJson[title], [key]: value };
-      // });
+      if (title !== null && title !== "" && title !== undefined) {
+        title2 = title[0].match(/\b.[^\][]*/gm)[0];
+      }
+      //console.log(title2);
+      let keysValues = [];
+      if (
+        match.match(regexKeyValue) !== null &&
+        match.match(regexKeyValue) !== "" &&
+        match.match(regexKeyValue) !== undefined
+      ) {
+        keysValues = match.match(regexKeyValue);
+      }
+
+      keysValues.forEach((keyValue) => {
+        let key = keyValue.split("=")[0];
+        let value = keyValue.split("=")[1];
+        myJson[title2] = { ...myJson[title2], [key]: value };
+      });
     });
   }
 
-  //console.log(myJson);
-  // let data = JSON.stringify(myJson);
-  // let jsonFile = path.basename(filename);
+  console.log(myJson);
+  let data = JSON.stringify(myJson);
+  let jsonFile = filename.split(path.extname(filename))[0];
 
-  // fs.writeFileSync(`${jsonFile}.json`, data);
-  // console.log(`File ${jsonFile}.json has been successfully created !`);
+  fs.writeFileSync(`${jsonFile}.json`, data);
+  console.log(`File ${jsonFile}.json has been successfully created !`);
 };
